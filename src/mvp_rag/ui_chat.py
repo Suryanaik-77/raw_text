@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 import os
-from mvp_rag.feedback_db import init_db, save_feedback
+from feedback_db import init_db, save_feedback
 
 BASE_API_URL = os.getenv("API_URL", "http://localhost:8000")
 API_URL = f"{BASE_API_URL}/query"
