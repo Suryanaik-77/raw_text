@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+pyvenv.cfg
+Lib/
+Scripts/
+Include/
+share/
+
+# Environment variables
+.env
+
+# Databases
+*.db
+
+# Docker volumes / runtime data
+volumes/
+test_results/
+
+# ML models
+*.pt
+*.onnx
+*.bin
+
+# OS
+.DS_Store

@@ -1,0 +1,43 @@
+# Core
+numpy>=1.26.0
+pandas>=2.2.0
+tqdm>=4.66.0
+requests>=2.32.0
+python-dotenv>=1.0.1
+
+# PDF + Image
+pypdf>=4.0.0
+pymupdf>=1.24.9
+pillow>=10.4.0
+opencv-python
+
+# ML / DL
+torch>=2.3.0
+transformers>=4.44.0
+accelerate>=1.1.0
+ultralytics>=8.3.0
+
+# RAG / LLM
+openai>=1.46.0
+langchain-openai
+langchain-text-splitters>=0.0.2
+
+# Vector DB
+pymilvus>=2.4.7
+
+# API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+
+# Web / Scraping
+beautifulsoup4>=4.12.0
+
+# Cloud
+boto3
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-mock>=3.12.0
+hypothesis>=6.100.0
+pytest-cov>=4.0.0

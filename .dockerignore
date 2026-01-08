@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+
+# Virtual environments (VERY IMPORTANT)
+.venv/
+venv/
+env/
+ENV/
+Include/
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+
+# Secrets
+.env
+.env.*
+
+# Docker / data
+volumes/
+docker-data/
+
+# Tests
+test/
+
+# Git
+.git/
+.gitignore
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ML / large files
+*.pt
+*.onnx
+*.ckpt
+*.h5
+*.pkl
+
+# PDFs (optional but recommended)
+docs/*.pdf
+
+__pycache__/
+*.pyc
+
+# virtualenv
+Include/
+Lib/
+Scripts/
+pyvenv.cfg
+
+.env
+volumes/
+test_results/
