@@ -1,8 +1,14 @@
 import sqlite3
 from datetime import datetime
 import os
-DB_DIR = "/app/data"
-DB_PATH = os.path.join(DB_DIR, "feedback.db")
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+# Create a writable data directory
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
+
+DB_PATH = DATA_DIR / "feedback.db"
 
 def init_db():
     conn = sqlite3.connect(DB_PATH)
