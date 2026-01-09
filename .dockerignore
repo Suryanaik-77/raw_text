@@ -1,60 +1,36 @@
-# Python
+# Python cache
 __pycache__/
-*.py[cod]
-*.so
-*.egg-info/
+*.pyc
+*.pyo
+*.pyd
 
-# Virtual environments (VERY IMPORTANT)
-.venv/
-venv/
-env/
-ENV/
+# Virtual environments
 Include/
 Lib/
 Scripts/
-share/
 pyvenv.cfg
-
-# Secrets
-.env
-.env.*
-
-# Docker / data
-volumes/
-docker-data/
-
-# Tests
-test/
+.venv/
+venv/
 
 # Git
 .git/
 .gitignore
 
-# OS / Editor
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
+# Data & volumes
+data/
+volumes/
+*.db
+
+# Env
+.env
 
 # ML / large files
 *.pt
+*.pth
 *.onnx
+*.bin
 *.ckpt
-*.h5
-*.pkl
 
-# PDFs (optional but recommended)
-docs/*.pdf
-
-__pycache__/
-*.pyc
-
-# virtualenv
-Include/
-Lib/
-Scripts/
-pyvenv.cfg
-
-.env
-volumes/
-test_results/
+# Docs / notebooks
+*.ipynb
+docs/

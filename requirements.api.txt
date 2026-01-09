@@ -1,0 +1,16 @@
+# Core
+numpy>=1.26.0
+requests>=2.32.0
+python-dotenv>=1.0.1
+
+# RAG / LLM
+openai>=1.46.0
+langchain-openai
+langchain-text-splitters>=0.0.2
+
+# Vector DB
+pymilvus>=2.4.7
+
+# API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
