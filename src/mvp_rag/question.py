@@ -68,6 +68,7 @@ def build_prompt(context: str, question: str) -> str:
 If CONTEXT is provided:
 You must answer ONLY using information that appears explicitly in the CONTEXT.
 
+if CONTEXT is not provided don't give answer instead give - context is insuffienct
 
 Do NOT mention context in output.
 
@@ -94,7 +95,8 @@ def answer_from_milvus(
     """
     ensure_milvus()
 
-    collection_name = os.getenv("MILVUS_COLLECTION", "vlsi_docs")
+    collection_name = os.getenv("MILVUS_COLLECTION1", "vlsi_docs")
+    print(f"📦 Using Milvus collection: {collection_name}")
     collection = Collection(collection_name)
     collection.load()
 

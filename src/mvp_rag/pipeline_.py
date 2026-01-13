@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from src.mvp_rag.text_extraction_ import PDFProcessor
+from src.mvp_rag.chunker import chunk_text
+from src.mvp_rag.embedding_ import milvus_store
+from src.mvp_rag.metadata_ import extract_metadata
+from src.mvp_rag.document_loader import loading_docs
 
-from text_extraction_ import PDFProcessor
-from chunker import chunk_text
-from embedding_ import milvus_store
-from metadata_ import extract_metadata
-from document_loader import loading_docs
 
 import sys
 sys.path.append('src/mvp_rag')
@@ -14,7 +14,7 @@ sys.path.append('src/mvp_rag')
 load_dotenv()
 
 YOLO_MODEL_PATH = os.getenv("YOLO")
-COLLECTION_NAME = os.getenv("MILVUS_COLLECTION", "vlsi_rag")
+COLLECTION_NAME = os.getenv("MILVUS_COLLECTION1", "vlsi_rag")
 MAX_WORKERS = min(os.cpu_count(), 4)
 
 
