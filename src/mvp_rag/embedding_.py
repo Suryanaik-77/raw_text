@@ -53,6 +53,7 @@ def get_or_create_collection(collection_name: str):
         FieldSchema(name="source", dtype=DataType.VARCHAR, max_length=256),
         FieldSchema(name="version", dtype=DataType.VARCHAR, max_length=256),
         FieldSchema(name="stage", dtype=DataType.VARCHAR, max_length=256),
+        FieldSchema(name="tool",dtype=DataType.VARCHAR,max_length=50)
     ]
 
     schema = CollectionSchema(fields, description="RAG PDF chunks")
@@ -69,7 +70,8 @@ def milvus_store(
     type_: str,
     version: str,
     vendor: str,
-    source: str
+    source: str,
+    tool: str
 ):
     collection = get_or_create_collection(collection_name)
 
@@ -85,8 +87,9 @@ def milvus_store(
         [vendor] * n,
         [source] * n,
         [version] * n,
-        [stage] * n
+        [stage] * n,
+        [tool] * n
     ])
 
     collection.flush()
-    print(f"Inserted {n} records into '{collection_name}'")
+    print(f"Inserted {n} records into '{collection_name}','{tool}'")

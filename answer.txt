@@ -1,0 +1,231 @@
+1. What is the difference between compile and compile_ultra commands in design_compiler
+Answer: 
+
+| Aspect                                      | compile command (DC Expert)                                                                       | compile_ultra command (DC Ultra / DC Graphical)                                                               |
+|----------------------------------------------|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| Main Usage                                  | Standard synthesis for area, timing, and power optimization in a wide range of designs            | Advanced synthesis for timing-critical, high-performance, or topographical designs                             |
+| Technology Modes                            | Uses wire load models for delay estimation                                                        | Uses topographical technology for accurate post-layout predictions (timing, area, power)                       |
+| Design Optimization                         | Optimizes combinational and sequential logic for area, timing, and power                          | Further optimizes with advanced features for delay reduction and QoR enhancement                               |
+| Advanced Features                           | Supports hierarchical/full/incremental compile, sequential optimization, time borrowing, etc.     | Adds automatic boundary optimization, automatic ungrouping, register retiming, datapath extraction, etc.        |
+| Library Support                             | Uses standard libraries, supports hierarchical and flat designs                                   | Selects optimal DesignWare components and uses ALIB pseudolibraries for better area/delay tradeoff             |
+| Placement and Physical Awareness             | Not physically aware; relies on wire load models                                                  | Physically aware (topographical), enabling features like physical guidance, congestion reduction, floorplanning |
+| Incremental Compilation                     | Supports incremental compile via -incremental_mapping option                                      | Supports incremental compile via -incremental option with topographical-based optimization                     |
+| Multicore/Concurrent Optimization           | Not highlighted                                                                                   | Supports multicore execution, multicorner-multimode concurrent optimization                                    |
+| Floorplanning/ Physical Block Stitching      | Not supported                                                                                     | Allows floorplan exploration, block stitching with -top option                                                 |
+| Default Tool                                | Runs in DC Expert                                                                                 | Runs in DC Ultra or DC Graphical                                                                               |
+| Customization and Control                   | Command-line and GUI interfaces, various compile strategies                                       | All compile_ultra options plus topographical and physical enhancements                                         |
+====================================================================================================
+
+2. I am reading hvt library as part of synthesis, I want to avoid few cells usage during synthesis, what is the command which I can use to avoid usage of few library cells?
+Answer: 
+
+To prevent certain library cells from being used during synthesis, use the command set_dont_use followed by the library name and cell name. For example:
+
+set_dont_use hvt_lib/CELL_NAME
+
+Replace CELL_NAME with the names of the cells you wish to avoid. This ensures that these specific cells will not be selected by the synthesis tool.
+====================================================================================================
+
+3. I dont want to delete unloaded sequential cells during optimization in synthesis in design compiler, what is the app_var I need to use and to what value I need to set it
+Answer: 
+
+To prevent the deletion of unloaded sequential cells during optimization in synthesis in Design Compiler, set the variable compile_delete_unloaded_sequential_cells to false before compilation.
+====================================================================================================
+
+4. I dont want to delete constant sequential cells during optimization in synthesis in design compiler, what is the app_var I need to use and to what value I need to set it
+Answer: 
+
+FINAL ANSWER:
+To prevent the deletion of constant sequential cells during optimization, set the app_var named compile_seqmap_propagate_constants to false.
+====================================================================================================
+
+5. What is the command to preserve logical hierarchy in the design during synthesis in Design Compiler
+Answer: 
+
+To preserve logical hierarchy in the design during synthesis in Design Compiler, you should use the set_dont_touch command.
+====================================================================================================
+
+6. For a given cell in the design in design compiler, how do I differentiate if that cell is combinational cell or sequential cell?
+Answer: 
+
+To distinguish whether a cell in the design is a combinational cell or a sequential cell in Design Compiler, observe the following:
+
+- A sequential cell is an instance in the design that exhibits memory behavior, such as flip-flops or latches, and typically has timing arcs related to clock signals and input data pins (for example, setup and hold arcs for synchronous inputs, recovery and removal arcs for asynchronous inputs).
+- A combinational cell does not possess memory behavior and only implements Boolean logic without referencing timing arcs associated with clock or asynchronous reset/preset signals.
+
+By examining the presence of timing arcs (like setup/hold, recovery/removal) and clock-related pins, you can determine if the cell is sequential (these arcs and pins are present) or combinational (they are absent).
+====================================================================================================
+
+7. what data does report_qor report have in design_compiler
+Answer: 
+
+The report_qor report in Design Compiler includes the following information:
+
+- Timing path group details, such as levels of logic, critical path length, critical path slack, clock period, total negative slack, and the number of violating paths.
+- Cell count, including the number of macros and other cells in the design.
+- Current design statistics, such as combinational area, non-combinational area, and total area.
+- Static power consumption data.
+- Design rule violation information.
+- Compile time details, including breakdowns of time spent in resource sharing, logic optimization, mapping optimization, overall compile time, and wall clock time.
+- Information about design scenarios, showing results for each scenario and path group present in the design.
+- Details on hold violations, including worst hold violation, total hold violation, and the number of hold violations.
+====================================================================================================
+
+8. what is the command to insert clock gating in design compiler
+Answer: 
+
+The command to insert clock gating in Design Compiler is to use the `-gate_clock` option with the `compile_ultra` command. You can specify it as follows:
+
+```
+compile_ultra -gate_clock
+```
+====================================================================================================
+
+9. What is the difference between design compiler nxt and design compiler topo tools
+Answer: 
+
+| Feature / Aspect                          | Design Compiler NXT                                                        | Design Compiler Topo (DC Ultra in Topographical Mode)         |
+|-------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------|
+| Position in Product Family                | Includes all features of DC Graphical, DC Ultra, and DC Expert plus more   | Core DC Ultra tool operating in topographical mode            |
+| Core Technology                           | Extension of DC Ultra topographical technology with further enhancements   | Uses topographical technology (virtual layout for accuracy)   |
+| Optimization & QoR                        | Advanced optimizations for better QoR, high performance core support       | Accurate timing, area, and power prediction without wire load models |
+| Physical Guidance                         | Enhanced physical guidance to IC Compiler II, improved RC and timing correlation, can pass seed placement | Provides physical guidance to IC Compiler, but less advanced  |
+| Runtime & Scalability                     | Faster runtime using improved multithreading and better scalability        | Supports multicore execution for faster runtimes              |
+| Placement & Floorplanning                 | Buffering-aware placement, congestion-driven restructuring; modify and explore floorplans | Placement-aware synthesis and accurate prediction, but fewer restructuring features |
+| Supported Features (Key Differences)      | Exclusive features: IC Compiler II Link, Fusion Libraries, high-effort area/TNS optimization, high-effort restructuring, automatic timing control | Does not provide these exclusive features                     |
+| Multicorner-Multimode Support             | Optimizes multicorner-multimode designs jointly                            | Supports multicorner-multimode optimization                   |
+| Compatibility                             | Plug-and-play UI/script compatibility with DC Graphical                    | Standard DC Ultra compatibility                               |
+| Compilation Commands                      | Uses compile_ultra -spg option for synthesis                               | Uses compile_ultra command in topographical mode              |
+| Licensing                                 | Requires Design-Compiler-NXT license                                       | Requires DC Ultra license                                     |
+====================================================================================================
+
+10. what does spg option do in compile_ultra command
+Answer: 
+
+The -spg option in the compile_ultra command enables physical guidance technology in Design Compiler. This results in several improvements, such as reducing routing congestion during synthesis, supporting enhanced placement, providing seed placement information to IC Compiler, enabling buffer-aware placement, and allowing automatic layer optimization. The -spg option also supports features like port punching for flexible load balancing, timing-driven placement with approximate timing models, and improved timing correlation with IC Compiler II. Additionally, when used in incremental compile flows, it allows incremental physical optimization and scan chain reordering to reduce wire length and congestion.
+====================================================================================================
+
+11. What is the difference between design compiler topo and design compiler graphical tools
+Answer: 
+
+| Aspect                                      | Design Compiler Topo (Topographical Mode)                        | Design Compiler Graphical                                   |
+|----------------------------------------------|------------------------------------------------------------------|-------------------------------------------------------------|
+| Main Functionality                          | Uses topographical technology to deliver accurate post-layout timing, area, and power predictions during synthesis by deriving a virtual layout and replacing wire load models with actual net capacitances. | Inherits all topographical capabilities and adds enhanced physical guidance, placement, floorplan exploration, and better integration with IC Compiler tools. |
+| Optimization Support                        | Supports high-fanout synthesis, test-ready flows, clock-gating, register retiming, multivoltage, and multicorner-multimode optimization. | Adds multicorner-multimode optimization, further reduction of routing congestion, and improved area/timing correlation with IC Compiler/IC Compiler II.       |
+| Physical Guidance                           | Not explicitly mentioned as supporting advanced physical guidance.                           | Provides physical guidance, including enhanced placement and seed placement handoff to IC Compiler, improving correlation, routability, and runtime.        |
+| Floorplanning                               | No dedicated floorplan exploration or modification features.                                 | Enables creation and modification of floorplans via floorplan exploration, including integration with IC Compiler floorplanning tools.                       |
+| Correlation With Place & Route               | Provides good correlation with final physical design by using virtual layout technology.       | Further improves correlation and runtime through direct physical guidance and floorplan compatibility with IC Compiler and IC Compiler II.                   |
+| Invocation                                  | Enabled by running the standard compile_ultra command in topographical mode.                 | Launched by running dc_shell with -topographical_mode and using compile_ultra -spg; requires DC Ultra and Design Compiler Graphical licenses.                |
+| Additional Features                         | Focused on accurate synthesis results without floorplan interaction.                          | Offers GUI-based plug-and-play interface, incremental and full synthesis after floorplan changes, and better script compatibility.                           |
+====================================================================================================
+
+12. what is the difference between link_lib and target_lib commands in design compiler
+Answer: 
+
+| Feature                         | link_lib Command                                                                                           | target_lib Command                                                                                       |
+|----------------------------------|-----------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|
+| Purpose                         | Specifies the libraries and design files used for resolving references and linking cell instances.         | Specifies the standard cell libraries used for mapping and optimization of the design during compilation. |
+| Role in Flow                    | Used for resolving cell/subdesign references, calculating timing values, delays, and unit settings.        | Used for implementing the design function by selecting gates from the specified libraries.                |
+| Impact on Design                | Ensures all cells and references in the design are connected to valid library definitions.                 | Determines which library cells are available for optimization and netlist generation.                     |
+| Contains                        | Can include both standard cell libraries and additional design files; a superset including target library. | Should only contain standard cell libraries for combinational logic and registers (not macros or IPs).    |
+| Variable Name                   | Set using the link_library variable.                                                                      | Set using the target_library variable.                                                                   |
+| Order of Search                 | Libraries are searched left-to-right; the first match is used for reference resolution.                   | Only the specified target libraries are used for gate selection and mapping during optimization.          |
+| Default Association             | The first library listed acts as the main library for default settings if not otherwise specified.         | All cell selection for mapping is confined to the explicitly listed target libraries.                     |
+====================================================================================================
+
+13. What happens if SDC file is not provided during synthesis? Will synthesis proceed or stop
+Answer: 
+
+If no SDC file is provided during synthesis, the process will still proceed. Synthesis does not require an SDC file to run, but without it, the design will not have defined constraints such as clocks, timing, or other circuit characteristics, potentially resulting in designs that do not meet timing or functional goals.
+====================================================================================================
+
+14. What is the command to get library cell name of instance in design compiler
+Answer: 
+
+To get the library cell name of an instance in Design Compiler, use the get_attribute command on the instance object, specifying the attribute reference.
+
+For example:
+get_attribute <instance> reference
+
+This command returns the library cell (reference) associated with the instance.
+====================================================================================================
+
+15. what is the command to know how many instances of the BUFD2SVT cell type have been inserted into the design
+Answer: 
+
+To determine the number of instances of the BUFD2SVT cell type inserted into the design, use the report_cell command. This command displays information about instances in the current design, enabling you to identify and count all BUFD2SVT cell instances.
+====================================================================================================
+
+16. How can I append SVF file information to the existing SVF file in design compiler during synthesis
+Answer: 
+
+To add new SVF file information to an existing SVF file during synthesis in Design Compiler, use the following command:
+```
+set_svf -append <existing_file>.svf
+```
+This appends the synthesis information to the specified SVF file rather than overwriting it.
+====================================================================================================
+
+17. I have 100 registers in my design, I would like to exclude reg1 and reg2 from inserting clock gating in their clock path. Provide the command for the same
+Answer: 
+
+To prevent clock gating from being inserted in the clock path of specific registers (reg1 and reg2), apply the following command to those registers:
+
+FINAL ANSWER:
+```
+set_clock_gating_disable [get_cells {reg1 reg2}] true
+```
+====================================================================================================
+
+18. How to avoid assign statements in the output netlist.
+Answer: 
+
+To prevent assign statements from appearing in the gate-level netlist, use the set_fix_multiple_port_nets command to control how multiple-port connections are handled. This command allows you to:
+
+- Insert buffers for feedthroughs with the -feedthroughs option, so that input and output ports are isolated by buffers.
+- Add buffers at multiple output ports using the -outputs option, ensuring that no driver pin feeds more than one output port.
+- Duplicate constant logic with the -constants option, making sure no constant source drives more than one destination.
+
+Applying set_fix_multiple_port_nets with the relevant options ensures the tool inserts buffers or duplicates logic instead of generating assign statements, thus producing a netlist without assign statements.
+====================================================================================================
+
+19. How can user explicitly instruct the DC tool to prioritize max delay instead of design rule constraints ?
+Answer: 
+
+To give maximum delay a higher priority than design rule constraints in Design Compiler, the user should use the set_cost_priority command with the -delay option. This command adjusts the tool's optimization order so that maximum delay is addressed before design rule constraints.
+====================================================================================================
+
+20. How can i remove buffers trees in the fanin cone of particular endpoint.
+Answer: 
+
+To eliminate buffer trees in the fanin cone of a specific endpoint, use the clean_buffer_tree command with the -source_of option and specify the desired endpoint (such as a load pin or output port). This action removes the entire buffer tree located in the fanin cone up to the provided object. The object list for the -source_of option should consist only of output ports or input pins.
+====================================================================================================
+
+21. How to enable multibit register inferring while reading the RTL.
+Answer: 
+
+To enable multibit register inferring during RTL reading, set the RTL bus inference option for multibit registers by using the following command:
+
+set hdlin_infer_multibit default_all
+
+This will configure the tool to infer multibit registers for all buses when reading the RTL.
+====================================================================================================
+
+22. How to create multibit flop grouping for selected registers..
+Answer: 
+
+To create multibit flop grouping for specific registers, you can manually assign the desired bits to a multibit register using the create_multibit command. This allows you to control which register bits are grouped together. After defining the grouping, the actual replacement with multibit cells happens during the compile_ultra step.
+
+Example steps:
+1. Use create_multibit to assign selected register bits to a named multibit group.
+2. Set mapping options if needed (e.g., for timing-driven optimization).
+3. Run compile_ultra to implement the multibit register replacement.
+
+For instance:
+- Assign bits: create_multibit -name my_multi_reg1 {reg_xy*}
+- Set options (optional): set_multibit_options -mode timing_driven
+- Compile: compile_ultra -scan -gate_clock
+
+This method targets your chosen registers for multibit register implementation during synthesis.
+====================================================================================================
+

@@ -63,14 +63,47 @@ def normalize(v):
 # -----------------------------
 def build_prompt(context: str, question: str) -> str:
     return f"""
-🧠 Response Priority Rules
+You are operating in STRICT CONTEXT-ONLY MODE.
 
-If CONTEXT is provided:
-You must answer ONLY using information that appears explicitly in the CONTEXT.
+The CONTEXT provided below is the ONLY source of truth.
+Treat it as a CLOSED WORLD.
 
-if CONTEXT is not provided don't give answer instead give - context is insuffienct
+You must NOT use any external knowledge, training data,
+or general understanding unless explicitly instructed.
 
-Do NOT mention context in output.
+==============================
+RESPONSE PRIORITY RULES
+==============================
+
+1. If the CONTEXT contains sufficient information:
+   - Answer using ONLY information that appears explicitly
+     or can be logically inferred from the CONTEXT.
+   - You may analyze relationships BETWEEN context chunks.
+   - Do NOT introduce concepts not present in the CONTEXT.
+
+2. If the CONTEXT does NOT contain sufficient information:
+     "Context insufficient"
+
+3. Do NOT copy sentences verbatim from the CONTEXT.
+   - Paraphrase using your own wording.
+   - Preserve the technical meaning.
+
+4. Perform internal analysis BEFORE answering.
+   - Correlate information across context chunks.
+   - Resolve consistency or differences if multiple chunks mention the topic.
+
+5. If both newer and older practices appear in the CONTEXT:
+   - Present the newer practice FIRST.
+   - Then mention older alternatives.
+
+6. If the question asks for differences or comparisons:
+   - The FINAL ANSWER MUST be in TABLE FORMAT.
+
+7. Silently correct any spelling or grammar mistakes in the question.
+
+==============================
+MANDATORY OUTPUT FORMAT
+==============================
 
 CONTEXT:
 {context}
@@ -87,7 +120,7 @@ FINAL ANSWER:
 # -----------------------------
 def answer_from_milvus(
     query: str,
-    top_k: int = 5,
+    top_k: int = 20,
     model: str = "gpt-4.1",
 ) -> str:
     """
@@ -95,7 +128,7 @@ def answer_from_milvus(
     """
     ensure_milvus()
 
-    collection_name = os.getenv("MILVUS_COLLECTION1", "vlsi_docs")
+    collection_name = os.getenv("MILVUS_COLLECTION", "vlsi_docs")
     print(f"📦 Using Milvus collection: {collection_name}")
     collection = Collection(collection_name)
     collection.load()
@@ -107,7 +140,7 @@ def answer_from_milvus(
         data=query_vec,
         anns_field="embedding",
         param={"metric_type": "IP", "params": {"nprobe": 8}},
-        limit=top_k,
+        limit=20,
         output_fields=["text"],
     )
 
@@ -122,7 +155,7 @@ def answer_from_milvus(
     response = client.responses.create(
         model=model,
         input=prompt,
-        max_output_tokens=800,
+        max_output_tokens=8000,
     )
 
     return response.output[0].content[0].text

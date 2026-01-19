@@ -40,7 +40,8 @@ METADATA SCHEMA (ALWAYS USE ALL FIELDS):
   "stage": "...",
   "type": "...",
   "version": "...",
-  "vendor": "..."
+  "vendor": "...",
+  "Tool": "..."
 }}
 
 MANDATORY CLASSIFICATION RULES (DO NOT VIOLATE):
@@ -69,6 +70,16 @@ MANDATORY CLASSIFICATION RULES (DO NOT VIOLATE):
 5️⃣ VENDOR RULE:
 - If TOOL → tool vendor name
 - If THEORY → vendor MUST be "NA"
+
+6️⃣ TOOL RULE (CRITICAL):
+- If type = "tool":
+  - You MUST infer the EDA tool name
+  - Guessing is REQUIRED
+  - Use commands, Tcl syntax, flow steps, file formats, and terminology
+  - Return ONE canonical tool name (e.g., Design Compiler, ICC2, Innovus, PrimeTime)
+  - NEVER return "Unknown" for tool documents
+- If type = "theory":
+  - tool MUST be "NA"
 
 IMPORTANT:
 - Do NOT invent stages

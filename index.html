@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Document Workflow</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background: linear-gradient(180deg, #e8f5e9, #ffffff);
+    padding: 30px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #1b5e20;
+    margin-bottom: 10px;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  .controls {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  button {
+    padding: 10px 18px;
+    font-size: 14px;
+    border: none;
+    border-radius: 20px;
+    background: #2e7d32;
+    color: white;
+    cursor: pointer;
+    margin: 0 6px;
+  }
+
+  button:hover {
+    background: #1b5e20;
+  }
+
+  .workflow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .step {
+    width: 100%;
+    max-width: 520px;
+    background: #f1f8e9;
+    border-left: 6px solid #4caf50;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 12px 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
+
+  .step.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .step h3 {
+    margin: 0;
+    color: #2e7d32;
+    font-size: 16px;
+  }
+
+  .step p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.5;
+  }
+
+  .arrow {
+    font-size: 26px;
+    color: #66bb6a;
+    margin: 6px 0;
+  }
+
+</style>
+</head>
+
+<body>
+
+<h1>📄 Document Processing Workflow</h1>
+
+<div class="container">
+
+  <div class="controls">
+    <button onclick="prevStep()">⬅ Previous</button>
+    <button onclick="nextStep()">Next ➡</button>
+    <button onclick="resetSteps()">🔄 Reset</button>
+  </div>
+
+  <div class="workflow">
+
+    <div class="step" id="s1">
+      <h3>📂 All Documents</h3>
+      <p>
+        All source documents (PDFs) are collected into a single folder.
+        This folder acts as the entry point for the entire pipeline.
+      </p>
+    </div>
+
+    <div class="arrow">⬇️</div>
+
+    <div class="step" id="s2">
+      <h3>📄 PDF Processing</h3>
+      <p>
+        Each PDF is parsed to extract raw text. This step handles text
+        normalization, encoding issues, and page-wise extraction.
+      </p>
+    </div>
+
+    <div class="arrow">⬇️</div>
+
+    <div class="step" id="s3">
+      <h3>🔀 Conditional Extraction</h3>
+      <p>
+        Based on configuration flags:
+        <br/>• <b>table_extraction</b> → extract tables
+        <br/>• <b>image_summary</b> → summarize images
+        <br/>
+        These steps run only if enabled.
+      </p>
+    </div>
+
+    <div class="arrow">⬇️</div>
+
+    <div class="step" id="s4">
+      <h3>🤖 Metadata Extraction (LLM)</h3>
+      <p>
+        The first <b>6000 characters</b> of raw text are sent to the LLM.
+        The model extracts structured metadata:
+        <br/>domain, stage, type, tool, vendor, version.
+      </p>
+    </div>
+
+    <div class="arrow">⬇️</div>
+
+    <div class="step" id="s5">
+      <h3>✂️ Chunking</h3>
+      <p>
+        The full raw text is split into smaller semantic chunks
+        to prepare for embedding and vector storage.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  let step = 1;
+  const maxStep = 5;
+
+  function render() {
+    for (let i = 1; i <= maxStep; i++) {
+      document.getElementById("s" + i).classList.remove("visible");
+    }
+
+    for (let i = 1; i <= step; i++) {
+      document.getElementById("s" + i).classList.add("visible");
+    }
+  }
+
+  function nextStep() {
+    if (step < maxStep) step++;
+    render();
+  }
+
+  function prevStep() {
+    if (step > 1) step--;
+    render();
+  }
+
+  function resetSteps() {
+    step = 1;
+    render();
+  }
+
+  render();
+</script>
+
+</body>
+</html>

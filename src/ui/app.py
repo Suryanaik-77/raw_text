@@ -5,18 +5,23 @@ import sqlite3
 from pathlib import Path
 from datetime import datetime
 
-# -----------------------------
-# Config
-# -----------------------------
+# =========================================================
+# CONFIG
+# =========================================================
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 TOP_K = 15
 
-BASE_DIR = Path(__file__).resolve().parents[2]   # project root
+# Project paths
+BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
+ANSWER_PATH = DATA_DIR / "answer.txt"
 DB_PATH = DATA_DIR / "feedback.db"
 
+# =========================================================
+# STREAMLIT PAGE CONFIG
+# =========================================================
 st.set_page_config(
     page_title="VLSI RAG Assistant",
     layout="centered"
@@ -24,9 +29,18 @@ st.set_page_config(
 
 st.title("💬 VLSI RAG Assistant")
 
-# -----------------------------
-# Database Setup
-# -----------------------------
+# =========================================================
+# SESSION STATE INIT
+# =========================================================
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+# =========================================================
+# DATABASE SETUP
+# =========================================================
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
@@ -43,7 +57,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 def save_feedback(user, question, answer, feedback):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
@@ -54,30 +67,25 @@ def save_feedback(user, question, answer, feedback):
     conn.commit()
     conn.close()
 
-
 init_db()
 
-# -----------------------------
-# Backend Health Check
-# -----------------------------
-def check_backend():
+# =========================================================
+# BACKEND HEALTH CHECK
+# =========================================================
+def backend_alive():
     try:
-        res = requests.get(f"{API_URL}/health", timeout=3)
-        return res.status_code == 200
+        r = requests.get(f"{API_URL}/health", timeout=3)
+        return r.status_code == 200
     except Exception:
         return False
 
-
-if not check_backend():
-    st.error("🚫 FastAPI backend is not running.\n\nPlease start the API server first.")
+if not backend_alive():
+    st.error("🚫 FastAPI backend is not running.\nPlease start the API server.")
     st.stop()
 
-# -----------------------------
-# User Login (Name)
-# -----------------------------
-if "user" not in st.session_state:
-    st.session_state.user = None
-
+# =========================================================
+# USER LOGIN
+# =========================================================
 if st.session_state.user is None:
     st.subheader("👤 Enter your name to start")
     name = st.text_input("Your name")
@@ -91,40 +99,30 @@ if st.session_state.user is None:
             st.warning("Please enter your name.")
     st.stop()
 
-# -----------------------------
-# Chat State
-# -----------------------------
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# -----------------------------
-# Display Chat History
-# -----------------------------
+# =========================================================
+# DISPLAY CHAT HISTORY
+# =========================================================
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# -----------------------------
-# Chat Input
-# -----------------------------
+# =========================================================
+# CHAT INPUT
+# =========================================================
 prompt = st.chat_input("Ask a question...")
 
-# -----------------------------
-# Handle New Message
-# -----------------------------
+# =========================================================
+# HANDLE USER MESSAGE
+# =========================================================
 if prompt:
-    # Store user question
+    # Show user message
     st.session_state.messages.append(
         {"role": "user", "content": prompt}
     )
-
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    payload = {
-        "question": prompt,
-        "top_k": TOP_K
-    }
+    payload = {"question": prompt, "top_k": TOP_K}
 
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
@@ -135,41 +133,57 @@ if prompt:
                     timeout=60
                 )
                 response.raise_for_status()
+
                 answer = response.json()["answer"]
 
+                # Show answer
                 st.markdown(answer)
-
                 st.session_state.messages.append(
                     {"role": "assistant", "content": answer}
                 )
 
-                # -----------------------------
-                # Feedback Form
-                # -----------------------------
+                # =================================================
+                # WRITE ANSWER TO FILE (GUARANTEED)
+                # =================================================
+                with open(ANSWER_PATH, "a", encoding="utf-8") as f:
+                    f.write(f"""
+USER:
+{prompt}
+
+ANSWER:
+{answer}
+
+{'='*100}
+""")
+
+                st.caption(f"📝 Answer logged to: {ANSWER_PATH}")
+
+                # =================================================
+                # FEEDBACK FORM
+                # =================================================
                 st.markdown("---")
                 st.subheader("📝 Feedback")
 
                 with st.form(key=f"feedback_{len(st.session_state.messages)}"):
                     feedback = st.text_area(
-                        "Was this answer helpful? Any comments?",
-                        placeholder="Write your feedback here..."
+                        "Was this answer helpful? Any comments?"
                     )
                     submitted = st.form_submit_button("Submit Feedback")
 
                     if submitted:
                         save_feedback(
-                            user=st.session_state.user,
-                            question=prompt,
-                            answer=answer,
-                            feedback=feedback
+                            st.session_state.user,
+                            prompt,
+                            answer,
+                            feedback
                         )
                         st.success("✅ Feedback saved. Thank you!")
 
             except requests.exceptions.Timeout:
-                st.error("⏱ Request timed out. Please try again.")
+                st.error("⏱ Request timed out.")
 
             except requests.exceptions.ConnectionError:
-                st.error("🚫 Lost connection to FastAPI server.")
+                st.error("🚫 Lost connection to FastAPI.")
 
             except Exception as e:
                 st.error(f"Unexpected error: {e}")
