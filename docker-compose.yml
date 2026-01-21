@@ -57,6 +57,8 @@ services:
     environment:
       MILVUS_HOST: milvus
       MILVUS_PORT: 19530
+    volumes:
+      - ./data:/app/data
     ports:
       - "8000:8000"
     restart: unless-stopped

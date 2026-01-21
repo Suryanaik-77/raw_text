@@ -1,0 +1,382 @@
+1. What is the difference between compile and compile_ultra commands in design_compiler
+Answer:
+
+designs, and it allows you to apply the best possible set of timing-centric variables or 
+commands during compile for critical delay optimization as well as QoR improvements.
+The following list highlights compile_ultra  command features that are in addition to 
+the features listed in 
+The compile Command. Note that some features require additional 
+licensing.
+• DesignWare components
+A DesignWare library is a collection of reusable circuit-design building blocks 
+(components) that are tightly integrated into the Synopsys synthesis environment. 
+When you use the compile_ultra  command, Design Compiler selects the component 
+with the best speed and area optimization from the DesignWare library during 
+synthesis. For more information, see 
+DesignWare Libraries.
+• Library-aware mapping and structuring
+Design Compiler® User Guide
+W-2024.09-SP3
+343344
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+
+designs for area, timing, and power.
+The following list highlights compile  command features:
+• Command-line interface and graphical user interface
+For more information, see 
+Running Design Compiler.
+• Hierarchical compile (top down or bottom up)
+For more information, see 
+Compile Strategies.
+• Full and incremental compile techniques
+For more information, see 
+Full and Incremental Compilation.
+• Sequential optimization for complex flip-flops and latches
+For more information, see 
+Optimizing the Design.
+• Timing analysis
+For more information, see 
+Analyzing Timing.
+See Also
+• DC Expert
+The compile_ultra Command
+Use the compile_ultra  command for designs that have significantly tight timing 
+constraints. The command is the best solution for timing-critical, high performance 
+designs, and it allows you to apply the best possible set of timing-centric variables or 
+commands during compile for critical delay optimization as well as QoR improvements.
+
+To compile a design, you use the compile  command in DC Expert or the compile_ultra 
+command in DC Ultra or DC Graphical. Command options allow you to customize and 
+control optimization. When you compile a design, Design Compiler reads the HDL source 
+code and optimizes the design created from that description. The tool uses heuristics 
+to implement a combination of library cells that meets the functional, speed, and area 
+requirements of the design according to the attributes and constraints placed on it. The 
+Design Compiler® User Guide
+W-2024.09-SP3
+4849
+Chapter 1: Design Compiler Introduction
+Selecting and Using a Compile Strategy
+Feedback
+optimization process trades off timing and area constraints to provide the smallest possible 
+circuit that meets the specified timing requirements.
+Design Compiler supports the following compile flows:
+• Full compile
+During a full compile, Design Compiler maps and optimizes the entire design, resulting
+
+compile_ultra  command.
+See Also
+•
+The compile_ultra Command
+• Overview of Topographical Technology
+DC Expert
+DC Expert optimizes designs for area, timing, and power using wire load models for 
+delay estimation. The tool provides the smallest and fastest logical representation of a 
+given function. It comprises tools that synthesize your HDL descriptions into optimized, 
+Design Compiler® User Guide
+W-2024.09-SP3
+3738
+Chapter 1: Design Compiler Introduction
+The Design Compiler Family
+Feedback
+technology-dependent, gate-level designs. It supports a wide range of flat and hierarchical 
+design styles and can optimize both combinational and sequential designs.
+The following list provides an overview of the DC Expert features:
+• Hierarchical compile (top down or bottom up)
+• Full and incremental compile techniques
+• Sequential optimization for complex flip-flops and latches
+• Time borrowing for latch-based designs
+• Timing analysis
+• Command-line interface and graphical user interface
+
+with the compile_ultra  -spg  command, extends topographical technology by
+◦ Enabling physical guidance technology, which includes enhanced placement and 
+the ability to pass seed placement to IC Compiler to improve quality of results 
+(QoR), correlation, and routability
+◦ Reducing routing congestion during synthesis
+◦ Enabling automatic layer optimization
+◦ Allowing you to create and modify floorplans using floorplan exploration
+For more information, see 
+Design Compiler NXT  and Design Compiler Graphical.
+See Also
+• DC Ultra
+Full and Incremental Compilation
+Design Compiler supports the following compile flows:
+• Full compile
+During a full compile, Design Compiler maps and optimizes the entire design, resulting 
+in a gate-level netlist of the design. Any mapped cells are unmapped to their logic 
+function first; no attempt is made to preserve existing netlist structures.
+• Incremental compile
+Design Compiler® User Guide
+W-2024.09-SP3
+345346
+Chapter 10: Compiling the Design
+
+• Compile Strategies
+• Performing a Top-Level Compile
+• Compile Log
+• Comparing QoR Data
+• Resolving Multiple Instances of a Design Reference
+• Test-Ready Compile
+Compile Commands
+To compile a design, use the compile  command if you are using DC Expert or the 
+compile_ultra  command if you are using DC Ultra or DC Graphical. Command options 
+allow you to customize and control optimization.
+• The compile Command
+• The compile_ultra Command
+The compile Command
+The compile  command runs DC Expert. DC Expert synthesizes your HDL descriptions 
+into optimized, technology-dependent, gate-level designs. It supports a wide range of 
+Design Compiler® User Guide
+W-2024.09-SP3
+342343
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+flat and hierarchical design styles and can optimize both combinational and sequential 
+designs for area, timing, and power.
+The following list highlights compile  command features:
+• Command-line interface and graphical user interface
+
+Full and Incremental Compilation
+Feedback
+When you run Design Compiler in topographical mode, the compile_ultra  command 
+uses topographical technology, which provides
+◦ Accurate post-layout timing, area, and power predictions without the need for wire 
+load model-based timing approximations, ensuring better correlation to the final 
+physical design.
+◦ Infrastructure to support multicore execution for faster runtimes.
+◦ Support for multivoltage and multiple supply designs.
+◦ Concurrent multicorner-multimode optimization, which reduces iterations and 
+provides faster time-to-results.
+For more information, see 
+Using Topographical Technology.
+• Design Compiler NXT and Design Compiler Graphical
+The Design Compiler NXT and Design Compiler Graphical tools, which are enabled 
+with the compile_ultra  -spg  command, extends topographical technology by
+◦ Enabling physical guidance technology, which includes enhanced placement and
+
+DesignWare Libraries.
+• Library-aware mapping and structuring
+Design Compiler® User Guide
+W-2024.09-SP3
+343344
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+This capability characterizes your target logic library and creates a pseudolibrary called 
+ALIB, which has mappings from Boolean functional circuits to actual gates from the 
+target library. The ALIB file provides Design Compiler with greater flexibility and a 
+larger solution space to explore tradeoffs between area and delay during optimization. 
+For more information, see 
+Library-Aware Mapping and Synthesis.
+• Automatic ungrouping
+The compile_ultra  command automatically ungroups certain logical hierarchies. 
+Ungrouping merges subdesigns of a given level of the hierarchy into the parent cell 
+or design. It removes hierarchical boundaries and allows Design Compiler to improve 
+timing by reducing the levels of logic and to improve area by sharing logic. For more
+
+======================================================================================================================================================
+
+1. What is the difference between compile and compile_ultra commands in design_compiler
+Answer:
+
+designs, and it allows you to apply the best possible set of timing-centric variables or 
+commands during compile for critical delay optimization as well as QoR improvements.
+The following list highlights compile_ultra  command features that are in addition to 
+the features listed in 
+The compile Command. Note that some features require additional 
+licensing.
+• DesignWare components
+A DesignWare library is a collection of reusable circuit-design building blocks 
+(components) that are tightly integrated into the Synopsys synthesis environment. 
+When you use the compile_ultra  command, Design Compiler selects the component 
+with the best speed and area optimization from the DesignWare library during 
+synthesis. For more information, see 
+DesignWare Libraries.
+• Library-aware mapping and structuring
+Design Compiler® User Guide
+W-2024.09-SP3
+343344
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+
+designs for area, timing, and power.
+The following list highlights compile  command features:
+• Command-line interface and graphical user interface
+For more information, see 
+Running Design Compiler.
+• Hierarchical compile (top down or bottom up)
+For more information, see 
+Compile Strategies.
+• Full and incremental compile techniques
+For more information, see 
+Full and Incremental Compilation.
+• Sequential optimization for complex flip-flops and latches
+For more information, see 
+Optimizing the Design.
+• Timing analysis
+For more information, see 
+Analyzing Timing.
+See Also
+• DC Expert
+The compile_ultra Command
+Use the compile_ultra  command for designs that have significantly tight timing 
+constraints. The command is the best solution for timing-critical, high performance 
+designs, and it allows you to apply the best possible set of timing-centric variables or 
+commands during compile for critical delay optimization as well as QoR improvements.
+
+To compile a design, you use the compile  command in DC Expert or the compile_ultra 
+command in DC Ultra or DC Graphical. Command options allow you to customize and 
+control optimization. When you compile a design, Design Compiler reads the HDL source 
+code and optimizes the design created from that description. The tool uses heuristics 
+to implement a combination of library cells that meets the functional, speed, and area 
+requirements of the design according to the attributes and constraints placed on it. The 
+Design Compiler® User Guide
+W-2024.09-SP3
+4849
+Chapter 1: Design Compiler Introduction
+Selecting and Using a Compile Strategy
+Feedback
+optimization process trades off timing and area constraints to provide the smallest possible 
+circuit that meets the specified timing requirements.
+Design Compiler supports the following compile flows:
+• Full compile
+During a full compile, Design Compiler maps and optimizes the entire design, resulting
+
+compile_ultra  command.
+See Also
+•
+The compile_ultra Command
+• Overview of Topographical Technology
+DC Expert
+DC Expert optimizes designs for area, timing, and power using wire load models for 
+delay estimation. The tool provides the smallest and fastest logical representation of a 
+given function. It comprises tools that synthesize your HDL descriptions into optimized, 
+Design Compiler® User Guide
+W-2024.09-SP3
+3738
+Chapter 1: Design Compiler Introduction
+The Design Compiler Family
+Feedback
+technology-dependent, gate-level designs. It supports a wide range of flat and hierarchical 
+design styles and can optimize both combinational and sequential designs.
+The following list provides an overview of the DC Expert features:
+• Hierarchical compile (top down or bottom up)
+• Full and incremental compile techniques
+• Sequential optimization for complex flip-flops and latches
+• Time borrowing for latch-based designs
+• Timing analysis
+• Command-line interface and graphical user interface
+
+with the compile_ultra  -spg  command, extends topographical technology by
+◦ Enabling physical guidance technology, which includes enhanced placement and 
+the ability to pass seed placement to IC Compiler to improve quality of results 
+(QoR), correlation, and routability
+◦ Reducing routing congestion during synthesis
+◦ Enabling automatic layer optimization
+◦ Allowing you to create and modify floorplans using floorplan exploration
+For more information, see 
+Design Compiler NXT  and Design Compiler Graphical.
+See Also
+• DC Ultra
+Full and Incremental Compilation
+Design Compiler supports the following compile flows:
+• Full compile
+During a full compile, Design Compiler maps and optimizes the entire design, resulting 
+in a gate-level netlist of the design. Any mapped cells are unmapped to their logic 
+function first; no attempt is made to preserve existing netlist structures.
+• Incremental compile
+Design Compiler® User Guide
+W-2024.09-SP3
+345346
+Chapter 10: Compiling the Design
+
+• Compile Strategies
+• Performing a Top-Level Compile
+• Compile Log
+• Comparing QoR Data
+• Resolving Multiple Instances of a Design Reference
+• Test-Ready Compile
+Compile Commands
+To compile a design, use the compile  command if you are using DC Expert or the 
+compile_ultra  command if you are using DC Ultra or DC Graphical. Command options 
+allow you to customize and control optimization.
+• The compile Command
+• The compile_ultra Command
+The compile Command
+The compile  command runs DC Expert. DC Expert synthesizes your HDL descriptions 
+into optimized, technology-dependent, gate-level designs. It supports a wide range of 
+Design Compiler® User Guide
+W-2024.09-SP3
+342343
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+flat and hierarchical design styles and can optimize both combinational and sequential 
+designs for area, timing, and power.
+The following list highlights compile  command features:
+• Command-line interface and graphical user interface
+
+Full and Incremental Compilation
+Feedback
+When you run Design Compiler in topographical mode, the compile_ultra  command 
+uses topographical technology, which provides
+◦ Accurate post-layout timing, area, and power predictions without the need for wire 
+load model-based timing approximations, ensuring better correlation to the final 
+physical design.
+◦ Infrastructure to support multicore execution for faster runtimes.
+◦ Support for multivoltage and multiple supply designs.
+◦ Concurrent multicorner-multimode optimization, which reduces iterations and 
+provides faster time-to-results.
+For more information, see 
+Using Topographical Technology.
+• Design Compiler NXT and Design Compiler Graphical
+The Design Compiler NXT and Design Compiler Graphical tools, which are enabled 
+with the compile_ultra  -spg  command, extends topographical technology by
+◦ Enabling physical guidance technology, which includes enhanced placement and
+
+DesignWare Libraries.
+• Library-aware mapping and structuring
+Design Compiler® User Guide
+W-2024.09-SP3
+343344
+Chapter 10: Compiling the Design
+Compile Commands
+Feedback
+This capability characterizes your target logic library and creates a pseudolibrary called 
+ALIB, which has mappings from Boolean functional circuits to actual gates from the 
+target library. The ALIB file provides Design Compiler with greater flexibility and a 
+larger solution space to explore tradeoffs between area and delay during optimization. 
+For more information, see 
+Library-Aware Mapping and Synthesis.
+• Automatic ungrouping
+The compile_ultra  command automatically ungroups certain logical hierarchies. 
+Ungrouping merges subdesigns of a given level of the hierarchy into the parent cell 
+or design. It removes hierarchical boundaries and allows Design Compiler to improve 
+timing by reducing the levels of logic and to improve area by sharing logic. For more
+
+======================================================================================================================================================
+
+1. What is the difference between compile and compile_ultra commands in design_compiler
+Answer:
+
+| Aspect                                 | compile command (DC Expert)                                                                 | compile_ultra command (DC Ultra/DC Graphical)                                                                                 |
+|-----------------------------------------|--------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Tool Used                              | Runs in DC Expert                                                                         | Runs in DC Ultra or DC Graphical                                                                                             |
+| Main Focus                             | Optimizes for area, timing, and power using wire load models                               | Best for timing-critical, high-performance designs with tight timing constraints                                             |
+| Timing Estimation                      | Uses wire load models for delay estimation                                                 | Uses topographical technology for accurate post-layout timing, area, and power predictions                                   |
+| DesignWare Library Support              | Not explicitly mentioned                                                                   | Selects best speed and area optimized components from DesignWare library                                                     |
+| Library-Aware Mapping                   | Not explicitly mentioned                                                                   | Uses ALIB pseudolibrary for greater flexibility in area and delay tradeoffs                                                  |
+| Automatic Ungrouping                    | Not mentioned                                                                              | Automatically ungroups certain logical hierarchies to improve timing and area                                                |
+| Physical Guidance/Placement             | Not mentioned                                                                              | With -spg option, enables physical guidance, enhanced placement, and floorplan exploration                                   |
+| Multicore Execution                     | Not mentioned                                                                              | Supports multicore execution for faster runtimes                                                                             |
+| Multivoltage/Multiple Supply Support    | Not mentioned                                                                              | Supports multivoltage and multiple supply designs                                                                            |
+| Multicorner-Multimode Optimization      | Not mentioned                                                                              | Supports concurrent multicorner-multimode optimization                                                                       |
+| User Interface                         | Command-line and graphical user interface                                                  | Command-line and graphical user interface                                                                                    |
+| Compile Techniques                     | Supports full and incremental compile, hierarchical compile, sequential optimization, etc. | Supports all compile features plus additional timing-centric and physical-aware optimizations                                 |
+
+======================================================================================================================================================
+

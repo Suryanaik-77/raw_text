@@ -3,48 +3,44 @@ from __future__ import annotations
 import os
 import time
 import numpy as np
+import streamlit as st
 from dotenv import load_dotenv
 from pymilvus import connections, Collection
 from pymilvus.exceptions import MilvusException
-from langchain_openai import OpenAIEmbeddings
-from openai import OpenAI
+from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 
 load_dotenv()
+
+COLLECTION_NAME = "ds"
+TOP_K = 10
+ANSWER_FILE = "rag_history.txt"
 
 _COLLECTION = None
 _EMBEDDINGS = None
 
+st.set_page_config(page_title="VLSI RAG Assistant", layout="centered")
+st.title("💬 VLSI RAG Assistant (Strict Context-Only RAG)")
+
 def get_collection():
     global _COLLECTION
-
     if _COLLECTION is None:
         connections.connect(
             alias="default",
-            host=os.getenv("MILVUS_HOST", "milvus"),
-            port=os.getenv("MILVUS_PORT", "19530"),
+            host="localhost",
+            port="19530",
             timeout=30,
         )
-
-        _COLLECTION = Collection(
-            os.getenv("MILVUS_COLLECTION", "vlsi_docs")
-        )
+        _COLLECTION = Collection(COLLECTION_NAME)
         _COLLECTION.load()
-
     return _COLLECTION
 
 def get_embedding_model():
     global _EMBEDDINGS
-
     if _EMBEDDINGS is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENAI_API_KEY is not set")
-
         _EMBEDDINGS = OpenAIEmbeddings(
             model="text-embedding-3-large",
-            api_key=api_key,
+            api_key=os.getenv("OPENAI_API_KEY"),
         )
-
     return _EMBEDDINGS
 
 def normalize(v):
@@ -117,7 +113,14 @@ QUESTION:
 FINAL ANSWER:
 """
 
-def answer_from_milvus(query, top_k=8, model="gpt-4.1"):
+@st.cache_resource
+def get_llm():
+    return ChatOpenAI(
+        model="gpt-4.1",
+        temperature=0.0,
+    )
+
+def answer_from_milvus(query, top_k=TOP_K):
     collection = get_collection()
     embedding_model = get_embedding_model()
 
@@ -138,18 +141,63 @@ def answer_from_milvus(query, top_k=8, model="gpt-4.1"):
     else:
         return "Search engine temporarily unavailable. Please retry."
 
+    if not results or not results[0]:
+        return "Context insufficient"
+
     context = "\n\n".join(
         hit.entity.get("text", "")
         for hit in results[0]
     )
 
-    prompt = build_prompt(context, query)
+    if not context.strip():
+        return "Context insufficient"
 
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    response = client.responses.create(
-        model=model,
-        input=prompt,
-        max_output_tokens=8000,
+    prompt = build_prompt(context, query)
+    llm = get_llm()
+    response = llm.invoke(prompt)
+    answer = response.content.strip()
+
+    return answer if answer else "Context insufficient"
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "question_count" not in st.session_state:
+    st.session_state.question_count = 0
+
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+user_input = st.chat_input("Ask a VLSI / Design Compiler question...")
+
+if user_input:
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    with st.chat_message("user"):
+        st.markdown(user_input)
+
+    with st.chat_message("assistant"):
+        with st.spinner("🔍 Searching knowledge base..."):
+            answer = answer_from_milvus(user_input)
+        st.markdown(answer)
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": answer}
     )
 
-    return response.output[0].content[0].text
+    st.session_state.question_count += 1
+    q_no = st.session_state.question_count
+
+    with open(ANSWER_FILE, "a", encoding="utf-8") as f:
+        f.write(
+            f"""{q_no}. QUESTION:
+{user_input}
+
+ANSWER:
+{answer}
+
+{'=' * 120}
+
+"""
+        )

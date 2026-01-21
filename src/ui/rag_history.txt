@@ -1,0 +1,119 @@
+1. QUESTION:
+What is the difference between compile and compile_ultra commands in design_compiler
+
+ANSWER:
+| Aspect                          | compile command (DC Expert)                                                                 | compile_ultra command (DC Ultra/DC Graphical)                                                                                 |
+|----------------------------------|-------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------|
+| Tool Usage                       | Used in DC Expert                                                                         | Used in DC Ultra or DC Graphical                                                                                             |
+| Optimization Focus               | Optimizes for area, timing, and power                                                     | Best suited for timing-critical, high-performance designs with tight timing constraints                                      |
+| Timing-Centric Features          | Standard optimization                                                                     | Allows use of advanced timing-centric variables and commands for critical delay and QoR improvements                        |
+| DesignWare Component Selection   | Not specified                                                                             | Selects best speed and area optimized DesignWare components during synthesis                                                 |
+| Library-Aware Mapping            | Not specified                                                                             | Supports library-aware mapping and structuring for greater flexibility in area and delay tradeoffs                           |
+| Automatic Ungrouping             | Not specified                                                                             | Automatically ungroups certain logical hierarchies to improve timing and area                                                |
+| Register Retiming                | Not specified                                                                             | Supports adaptive retiming with the -retime option                                                                           |
+| Topographical Technology         | Not specified                                                                             | Uses topographical technology for accurate post-layout predictions and better correlation to physical design                 |
+| Physical Guidance (with -spg)    | Not available                                                                             | Enables physical guidance, enhanced placement, seed placement to IC Compiler, and floorplan exploration                      |
+| Multicore Execution              | Not specified                                                                             | Supports multicore execution for faster runtimes                                                                             |
+| Multivoltage/Multiple Supply     | Not specified                                                                             | Supports multivoltage and multiple supply designs                                                                            |
+| Multicorner-Multimode Optimization| Not specified                                                                            | Supports concurrent multicorner-multimode optimization                                                                       |
+| Incremental Compile              | Supported                                                                                 | Supported, with topographical-based optimization and -incremental option                                                     |
+| Hierarchical Compile             | Supported (top down or bottom up)                                                         | Supported                                                                                                                    |
+| User Interface                   | Command-line and graphical                                                                | Command-line and graphical                                                                                                   |
+
+========================================================================================================================
+
+2. QUESTION:
+I am reading hvt library as part of synthesis, I want to avoid few cells usage during synthesis, what is the command which I can use to avoid usage of few library cells?
+
+ANSWER:
+To prevent the use of specific library cells during synthesis, use the set_dont_use command with the appropriate library and cell names. For example:
+
+set_dont_use hvt_lib/CELL_NAME
+
+========================================================================================================================
+
+3. QUESTION:
+I dont want to delete unloaded sequential cells during optimization in synthesis in design compiler, what is the app_var I need to use and to what value I need to set it
+
+ANSWER:
+To prevent deletion of unloaded sequential cells during optimization in synthesis in Design Compiler, set the app_var compile_delete_unloaded_sequential_cells to false.
+
+========================================================================================================================
+
+4. QUESTION:
+I dont want to delete constant sequential cells during optimization in synthesis in design compiler, what is the app_var I need to use and to what value I need to set it
+
+ANSWER:
+To prevent deletion of constant sequential cells during optimization in Design Compiler, use the set_constant_register_removal command and set its value to false.
+
+========================================================================================================================
+
+5. QUESTION:
+What is the command to preserve logical hierarchy in the design during synthesis in Design Compiler
+
+ANSWER:
+Context insufficient
+
+========================================================================================================================
+
+6. QUESTION:
+For a given cell in the design in design compiler, how do I differentiate if that cell is combinational cell or sequential cell?
+
+ANSWER:
+Context insufficient
+
+========================================================================================================================
+
+7. QUESTION:
+what data does report_qor report have in design_compiler
+
+ANSWER:
+The report_qor command in Design Compiler provides the following data:
+
+- Timing path group details for each scenario, including:
+  - Levels of logic
+  - Critical path length
+  - Critical path slack
+  - Critical path clock period
+  - Total negative slack
+  - Number of violating paths
+  - Worst hold violation
+  - Total hold violation
+  - Number of hold violations
+- Cell count information, including the number of macros in the design
+- Design statistics such as:
+  - Combinational area
+  - Noncombinational area
+  - Total area
+- Static power
+- Design rule violations
+- Compile time details, including the wall clock time of the last compile command
+
+The report_qor command displays these quality of results (QoR) metrics for the current design and is not part of the create_qor_snapshot and query_qor_snapshot command set.
+
+========================================================================================================================
+
+8. QUESTION:
+what is the command to insert clock gating in design compiler
+
+ANSWER:
+The command to insert clock gating in Design Compiler is to use the -gate_clock option with the compile_ultra command.
+
+========================================================================================================================
+
+9. QUESTION:
+What is the difference between design compiler nxt and design compiler topo tools
+
+ANSWER:
+Context insufficient
+
+========================================================================================================================
+
+10. QUESTION:
+what does spg option do in compile_ultra command
+
+ANSWER:
+The -spg option in the compile_ultra command enables physical guidance technology, which provides enhanced placement, allows seed placement information to be passed to IC Compiler for improved quality of results, correlation, and routability, reduces routing congestion during synthesis, enables automatic layer optimization, and supports floorplan creation and modification through floorplan exploration. It also activates buffer-aware placement and timing-driven placement with an approximate timing model, and enables port punching for better load balancing and quality of results.
+
+========================================================================================================================
+
