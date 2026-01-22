@@ -2,27 +2,26 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from src.mvp_rag.question import answer_from_milvus
 from src.mvp_rag.feedback_db import init_db, save_feedback
-import os
 import sqlite3
 from fastapi.responses import HTMLResponse
+from datetime import datetime
 
 app = FastAPI()
 
 @app.on_event("startup")
 def startup_event():
-    print("🚀 FastAPI startup: initializing feedback DB")
     init_db()
-    print("✅ init_db() completed")
 
 class QueryRequest(BaseModel):
     question: str
-    top_k: int = 8
+    top_k: int
 
 class FeedbackRequest(BaseModel):
     user: str
     question: str
     answer: str
-    feedback: str
+    rating: int = 0
+    feedback: str | None = None
 
 @app.get("/health")
 def health():
@@ -30,16 +29,23 @@ def health():
 
 @app.post("/query")
 def query(req: QueryRequest):
-    answer = answer_from_milvus(req.question, req.top_k)
-    return {"answer": answer}
+    answer, chunks = answer_from_milvus(req.question, req.top_k)
+    return {
+        "answer": answer,
+        "chunks": chunks
+    }
 
 @app.post("/feedback")
 def feedback(req: FeedbackRequest):
+    created_at = datetime.utcnow().isoformat()
+
     save_feedback(
         req.user,
         req.question,
         req.answer,
-        req.feedback
+        req.rating,
+        req.feedback,
+        created_at
     )
     return {"status": "saved"}
 
@@ -51,7 +57,7 @@ def view_feedback():
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT user, question, answer, feedback
+        SELECT user, question, answer, rating, feedback, created_at
         FROM feedback
         ORDER BY rowid DESC
     """)
@@ -77,7 +83,9 @@ def view_feedback():
                 <th>User</th>
                 <th>Question</th>
                 <th>Answer</th>
+                <th>Rating</th>
                 <th>Feedback</th>
+                <th>Created At</th>
             </tr>
     """
 
@@ -88,6 +96,8 @@ def view_feedback():
             <td>{r[1]}</td>
             <td>{r[2]}</td>
             <td>{r[3]}</td>
+            <td>{r[4]}</td>
+            <td>{r[5]}</td>
         </tr>
         """
 

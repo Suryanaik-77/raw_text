@@ -13,6 +13,7 @@ def init_db():
             user TEXT,
             question TEXT,
             answer TEXT,
+            rating INTEGER DEFAULT 0,
             feedback TEXT,
             created_at TEXT
         )
@@ -20,16 +21,17 @@ def init_db():
     conn.commit()
     conn.close()
 
-def save_feedback(user, question, answer, feedback):
+def save_feedback(user, question, answer, rating, feedback,created_at):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        INSERT INTO feedback (user, question, answer, feedback, created_at)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO feedback (user, question, answer, rating, feedback, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
     """, (
         user,
         question,
         answer,
+        rating,
         feedback,
         datetime.utcnow().isoformat()
     ))

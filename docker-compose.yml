@@ -47,7 +47,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: src/backend/Dockerfile
     image: rag_dc-api
     container_name: rag-api
     depends_on:
@@ -66,7 +66,7 @@ services:
   ui:
     build:
       context: .
-      dockerfile: Dockerfile.ui
+      dockerfile: src/frontend/Dockerfile
     image: rag_dc-ui
     container_name: rag-ui
     depends_on:

@@ -12,7 +12,7 @@ from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 load_dotenv()
 
 COLLECTION_NAME = "ds"
-TOP_K = 10
+TOP_K = 16
 ANSWER_FILE = "rag_history.txt"
 
 _COLLECTION = None

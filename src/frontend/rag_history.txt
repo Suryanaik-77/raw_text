@@ -1,0 +1,12 @@
+1. QUESTION:
+I dont want to delete constant sequential cells during optimization in synthesis in design compiler, what is the app_var I need to use and to what value I need to set it
+
+ANSWER:
+CONTEXT:
+To prevent constant sequential cells from being deleted during optimization in synthesis in Design Compiler, use the set_constant_register_removal command and set the remove_constant_register attribute to false for the desired registers.
+
+FINAL ANSWER:
+You need to use the set_constant_register_removal command and set the remove_constant_register attribute to false.
+
+========================================================================================================================
+

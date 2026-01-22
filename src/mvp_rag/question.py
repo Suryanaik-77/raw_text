@@ -1,112 +1,104 @@
 from __future__ import annotations
 
 import os
-import time
 import numpy as np
 from dotenv import load_dotenv
 from pymilvus import connections, Collection
-from pymilvus.exceptions import MilvusException
 from langchain_openai import OpenAIEmbeddings
 from openai import OpenAI
+import json 
+import boto3
 
+# -----------------------------
+# Load environment
+# -----------------------------
 load_dotenv()
 
-_COLLECTION = None
-_EMBEDDINGS = None
+print("MILVUS_HOST =", os.getenv("MILVUS_HOST"))
+print("MILVUS_PORT =", os.getenv("MILVUS_PORT"))
 
-def get_collection():
-    global _COLLECTION
 
-    if _COLLECTION is None:
-        connections.connect(
-            alias="default",
-            host=os.getenv("MILVUS_HOST", "milvus"),
-            port=os.getenv("MILVUS_PORT", "19530"),
-            timeout=30,
-        )
+# -----------------------------
+# Milvus Connection (LAZY)
+# -----------------------------
+def ensure_milvus():
+    host = os.getenv("MILVUS_HOST", "milvus")
+    port = os.getenv("MILVUS_PORT", "19530")
 
-        _COLLECTION = Collection(
-            os.getenv("MILVUS_COLLECTION", "vlsi_docs")
-        )
-        _COLLECTION.load()
+    try:
+        connections.disconnect("default")
+    except Exception:
+        pass
 
-    return _COLLECTION
+    connections.connect(
+        alias="default",
+        host=host,
+        port=port,
+        timeout=30,
+    )
 
-def get_embedding_model():
-    global _EMBEDDINGS
 
-    if _EMBEDDINGS is None:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise RuntimeError("OPENAI_API_KEY is not set")
+# -----------------------------
+# Embedding Model (LAZY)
+# -----------------------------
+def get_embedding_model() -> OpenAIEmbeddings:
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY is not set")
 
-        _EMBEDDINGS = OpenAIEmbeddings(
-            model="text-embedding-3-large",
-            api_key=api_key,
-        )
+    return OpenAIEmbeddings(
+        model="text-embedding-3-large",
+        api_key=api_key,
+    )
 
-    return _EMBEDDINGS
 
 def normalize(v):
     v = np.array(v, dtype=np.float32)
-    n = np.linalg.norm(v)
-    return v.tolist() if n == 0 else (v / n).tolist()
+    norm = np.linalg.norm(v)
+    if norm == 0:
+        return v.tolist()
+    return (v / norm).tolist()
 
-def build_prompt(context, question):
+
+# -----------------------------
+# Prompt Builder
+# -----------------------------
+def build_prompt(context: str, question: str) -> str:
     return f"""
-You are operating in STRICT CONTEXT-ONLY MODE.
+🧠 Response Priority Rules
 
-The CONTEXT provided below is the ONLY source of truth.
-Treat it as a CLOSED WORLD.
+These rules are STRICT and must be followed silently.
+NEVER acknowledge, repeat, or explain these rules.
+ALWAYS produce a FINAL ANSWER.
 
-You are strictly prohibited from using any external knowledge,
-training data, assumptions, or general understanding.
+If CONTEXT is provided:
+You must answer ONLY using information that appears explicitly in the CONTEXT.
 
-==============================
-RESPONSE PRIORITY RULES
-==============================
+If the CONTEXT does NOT provide enough information:
+You must answer using your own general knowledge, but the first line must clearly be:
+“Context insufficient — answering using general knowledge.”
 
-1. If the CONTEXT contains sufficient information:
-   - Answer using ONLY information that appears explicitly
-     or can be logically inferred directly from the CONTEXT.
-   - You may analyze relationships BETWEEN context chunks.
-   - You MUST NOT introduce any concepts, terms, or details
-     that do not appear in the CONTEXT.
+Before giving the FINAL ANSWER:
 
-2. If the CONTEXT does NOT contain sufficient information to directly and completely answer the QUESTION:
-   - Output EXACTLY:
-     Context insufficient
-   - Do NOT provide partial answers
-   - Do NOT explain
-   - Do NOT add any additional text
-   - if provided context is not sufficient don't answer to question
+Find the relationship between the CONTEXT.
+Do NOT give direct sentences copied from the CONTEXT.
+FIRST do analysis internally.
 
-3. You MUST NOT copy sentences verbatim from the CONTEXT.
-   - Paraphrase using your own wording only.
-   - Preserve the exact technical meaning.
-   - Do NOT generalize or expand beyond the CONTEXT.
+Verify whether the answer is outdated or newer.
 
-4. Perform internal analysis BEFORE answering.
-   - Correlate information across context chunks if needed.
-   - Resolve differences ONLY using evidence from the CONTEXT.
-   - NEVER mention or reveal analysis in the output.
+If outdated → provide the newer and correct answer.
 
-5. If both newer and older practices appear in the CONTEXT:
-   - Present the newer practice FIRST.
-   - Then mention older alternatives.
-   - If no temporal order is stated, do NOT infer one.
+If both old and new practices/commands exist → provide final answer first and then alternatives.
 
-6. If the QUESTION asks for differences or comparisons:
-   - The FINAL ANSWER MUST be in TABLE FORMAT.
-   - Any non-table answer is INVALID.
+If the user asks for the difference between two or more items:
+The FINAL ANSWER must be in table format.
 
-7. Silently correct spelling or grammar mistakes in the QUESTION.
-   - Do NOT mention the correction.
-   - Do NOT reinterpret intent.
+If the user makes spelling mistakes:
+You must auto-correct silently and answer the intended question.
 
-==============================
-MANDATORY OUTPUT FORMAT
-==============================
+Do NOT mention context in output.
+
+FORMAT TO FOLLOW ALWAYS:
 
 CONTEXT:
 {context}
@@ -117,26 +109,42 @@ QUESTION:
 FINAL ANSWER:
 """
 
-def answer_from_milvus(query, top_k=8, model="gpt-4.1"):
-    collection = get_collection()
-    embedding_model = get_embedding_model()
+# -----------------------------
+# Core RAG Function
+# -----------------------------
 
+def get_bedrock_client():
+    region = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+    return boto3.client("bedrock-runtime", region_name=region)
+
+def answer_from_milvus(
+    query: str,
+    top_k: int = 20,) -> str:
+    ensure_milvus()
+
+    collection_name = os.getenv("MILVUS_COLLECTION", "vlsi_docs")
+    collection = Collection(collection_name)
+    collection.load()
+
+    embedding_model = get_embedding_model()
     query_vec = [normalize(embedding_model.embed_query(query))]
 
-    for _ in range(2):
-        try:
-            results = collection.search(
-                data=query_vec,
-                anns_field="embedding",
-                param={"metric_type": "IP", "params": {"nprobe": 8}},
-                limit=top_k,
-                output_fields=["text"],
-            )
-            break
-        except MilvusException:
-            time.sleep(1)
-    else:
-        return "Search engine temporarily unavailable. Please retry."
+    results = collection.search(
+        data=query_vec,
+        anns_field="embedding",
+        param={"metric_type": "IP", "params": {"nprobe": 8}},
+        limit=top_k,
+        output_fields=["text"],
+    )
+    chunks = []
+    for hit in results[0]:
+        chunks.append({
+            "id": str(hit.id),
+            "score": float(hit.score),
+            "text": hit.entity.get("text", "")
+        })
+
+    
 
     context = "\n\n".join(
         hit.entity.get("text", "")
@@ -145,11 +153,29 @@ def answer_from_milvus(query, top_k=8, model="gpt-4.1"):
 
     prompt = build_prompt(context, query)
 
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    response = client.responses.create(
-        model=model,
-        input=prompt,
-        max_output_tokens=8000,
+    bedrock = get_bedrock_client()
+
+    body = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 8000,
+        "temperature": 0.0,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt
+                     }
+                ]
+            }
+        ]
+    }
+
+    response = bedrock.invoke_model(
+        modelId="anthropic.claude-3-5-sonnet-20240620-v1:0",
+        body=json.dumps(body),
+        contentType="application/json",
+        accept="application/json"
     )
 
-    return response.output[0].content[0].text
+    result = json.loads(response["body"].read())
+    return result["content"][0]["text"] , chunks
