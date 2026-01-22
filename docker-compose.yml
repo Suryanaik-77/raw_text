@@ -60,7 +60,7 @@ services:
     volumes:
       - ./data:/app/data
     ports:
-      - "8000:8000"
+      - "8001:8001"
     restart: unless-stopped
 
   ui:
@@ -74,5 +74,5 @@ services:
     env_file:
       - .env
     ports:
-      - "8501:8501"
+      - "8502:8502"
     restart: unless-stopped
