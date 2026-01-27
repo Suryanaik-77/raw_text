@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 from pymilvus import connections, Collection
 from pymilvus.exceptions import MilvusException
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-
 load_dotenv()
 
 COLLECTION_NAME = "ds"

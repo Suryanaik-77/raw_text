@@ -10,7 +10,7 @@ from document_loader import loading_docs
 
 load_dotenv()
 
-COLLECTION_NAME = os.getenv("MILVUS_COLLECTION1", "vlsi_rag")
+#COLLECTION_NAME = os.getenv("MILVUS_COLLECTION1", "vlsi_rag")
 MAX_WORKERS = min(os.cpu_count(), 4)
 
 # --------------------------------------------------
@@ -38,7 +38,7 @@ def process_single_document(doc: dict):
         chunks = chunk_text(raw_text)
         if not chunks:
             return f"[SKIP] No chunks: {file_name}"
-
+        COLLECTION_NAME = metadata["domain"].replace(" ","_")
         # 4️⃣ Store in Milvus
         milvus_store(
             collection_name=COLLECTION_NAME,
@@ -49,6 +49,7 @@ def process_single_document(doc: dict):
             version=metadata["version"],
             vendor=metadata["vendor"],
             source=file_name,
+            tool=metadata["Tool"]
         )
 
         return f"[DONE] {file_name}"

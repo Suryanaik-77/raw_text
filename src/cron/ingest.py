@@ -15,7 +15,7 @@ import argparse
 from dotenv import load_dotenv
 
 # Import your pipeline runner
-from src.mvp_rag.pipeline_ import run_parallel_indexing
+from mvp_rag.test_pipeline import run_parallel_indexing
 
 def main():
     load_dotenv()
